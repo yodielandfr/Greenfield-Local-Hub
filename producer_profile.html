@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producer Profile - GLH</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        <a href="/producer/dashboard">Dashboard</a>
+        <a href="/products">Products</a>
+        <a href="/producers">Producers</a>
+        <a href="/about">About</a>
+        <a href="/sign-out">Sign Out</a>
+        <a href="/producer/profile" class="account-icon active">&#128100;</a>
+    </div>
+
+    <div class="form-wrapper">
+        <h2>Your Producer Profile</h2>
+        <br>
+        <form action="/producer/profile" method="post">
+            <div class="name-row">
+                <input type="text" name="first_name" value="{{ producer['first_name'] if producer else '' }}" placeholder="First Name">
+                <input type="text" name="last_name" value="{{ producer['last_name'] if producer else '' }}" placeholder="Last Name">
+            </div>
+
+            <input type="text" name="name" value="{{ producer['name'] if producer else ''}}" placeholder="Business Name">
+            <textarea name="description" placeholder="Business Description" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; margin-bottom: 12px;">{{ producer['description'] if producer else '' }}</textarea>
+            <input type="text" name="contactEmail" value="{{ producer['contactEmail'] if producer else ''}}" placeholder="Contact email">
+            <input type="text" name="contactPhone" value="{{ producer['contactPhone'] if producer else ''}}" placeholder="Contact phone">
+            <button class="submit-button" type="submit">Save changes</button>
+        </form>
+        <br>
+        <a href="/producer/dashboard"><button class="submit-button">Back to the dashboard</button></a>
+        <a href="/sign-out"><button class="submit-button">Sign Out</button></a>
+    </div>
+
+</body>
+</html>

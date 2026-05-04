@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basket - Greenfield Local Hub</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        {% if session.get('role') == 'customer' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/alerts">Promotions</a>
+            <a href="/basket" class="active">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/account" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'guest' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket" class="active">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up">Sign Up</a>
+        {% else %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket" class="active">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up">Sign Up</a>
+        {% endif %}
+    </div>
+
+    <h2 class="basket-heading">Your Basket</h2>
+
+    {% if items %}
+        {% for item in items %}
+        <div class="basket-item">
+            <div class="basket-item-image">{% if item.image %}<img src="/static/images/{{ item.image }}" alt="{{ item.name }}">{% else %}&#127825;{% endif %}</div>
+            <div class="basket-item-info">
+                <h3>{{ item.name }}</h3>
+                <p style="font-size: 0.82rem; color: #1a5c38; margin-bottom: 3px;">By {{ item.producer_name }}</p>
+                <p class="desc-bar">{{ item.transparency_details }}</p>
+            </div>
+            <div class="basket-item-right">
+                {% if session.get('role') == 'customer' %}
+                    <p class="price-main">£{{ "%.2f" | format(item.price_cents * 0.9 / 100) }} <span style="color: #1a5c38; font-size: 0.8rem;">(10% Off)</span></p>
+                    <p class="price-detail" style="text-decoration:line-through; color:#888;">was £{{ "%.2f" | format(item.price_cents / 100) }}</p>
+                {% else %}
+                    <p class="price-main">£{{ "%.2f" | format(item.price_cents / 100) }}</p>
+                {% endif %}
+
+                <div class="stock-qty">
+                    Stock: {{ item.stock }}
+                    <form action="/basket/update" method="post" style="display: inline;">
+                        <input type="hidden" name="product_id" value="{{ item.productID }}">
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.stock }}">
+                        <button class="submit-button" type="submit" style="padding: 3px 8px; font-size: 0.8rem;">Update</button>
+                    </form>
+                </div>
+                <form action="/basket/remove/{{ item.productID }}" method="post">
+                    <button class="submit-button" type="submit">[Remove]</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="basket-totals">
+            <p><strong>Amount of items: {{ item_count }}</strong></p>
+            {% if session.get('role') == 'customer' %}
+                <p style="text-decoration: line-through; color: #888;">Was: £{{ "%.2f" | format(total_cents / 100) }}</p>
+                <p><strong>Order Total: £{{ "%.2f" | format(total_cents * 0.9 / 100) }}</strong>(10% Discount applied)</p>
+            {% else %}
+                <p><strong>Order Total: £{{ "%.2f" | format(total_cents / 100) }}</strong></p>
+            {% endif %}
+            <br>
+            <a href="/checkout"><button class="submit-button">Go To Checkout</button></a>
+        </div>
+
+    {% else %}
+        <div class="empty-state">
+            <p>Your Basket is empty</p>
+            <a href="/products"><button class="submit-button">Browse products</button></a>
+        </div>
+    {% endif %}
+
+</body>
+</html>

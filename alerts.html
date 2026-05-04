@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts - Greenfield Local Hub</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        {% if session.get('role') == 'customer' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/alerts" class="active">Promotions</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/account" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'producer' %}
+            <a href="/producer/dashboard">Dashboard</a>
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/producer/profile" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'guest' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/alerts" class="active">Promotions</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up">Sign Up</a>
+        {% else %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/sign-up">Sign Up</a>
+            <a href="/sign-in">Log In</a>
+            <a href="/about">About</a>
+            <a href="/alerts" class="active">Promotions</a>
+        {% endif %}
+    </div>
+
+    <div style="max-width: 700px; margin: 30px auto; padding: 0 20px;">
+        <h2 style="margin-bottom: 16px;">Promotions &amp; Alerts</h2>
+        {% if promotions %}
+            {% for promo in promotions %}
+            <div class="info-card">
+                <h3>{{ promo.title }}
+                    {% if promo.is_member_only %}
+                        <span style="font-size: 0.75rem; background: #1a5c38; color: white; padding: 2px 8px; margin-left: 8px;">Members Only</span>
+                    {% endif %}
+                    </h3>
+                <p>{{ promo.description }}</p>
+                <p><strong>{{ promo.discount_percent }}% off</strong></p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No active promotions at the moment.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

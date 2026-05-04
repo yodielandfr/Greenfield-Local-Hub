@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenField Local Hub</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        {% if session.get('role') == 'customer' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/alerts">Promotions</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/account" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'producer' %}
+            <a href="/producer/dashboard">Dashboard</a>
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/producer/profile" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'guest' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up">Sign Up</a>
+        {% else %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/sign-up">Sign Up</a>
+            <a href="/sign-in">Log In</a>
+            <a href="/about">About</a>
+        {% endif %}
+    </div>
+    
+
+    <!-- hero section: welcome text left, green info box right -->
+    <div class="hero-section">
+        <div class="hero-left">
+            <h1>Welcome To the Greenfield Local Hub</h1>
+            {% if session.get('role') == 'customer' %}
+                <p>Hello again, <strong>{{ session.get('first_name') }}</strong>! Browse fresh local produce from our trusted producers.</p>
+                <br>
+                <a href="/alerts"><button class="submit-button">View Promotions</button></a>
+            {% elif session.get('role') == 'producer' %}
+                <p>Welcome back, <strong>{{ session.get('producer_name') }}</strong>! Browse the GLH marketplace.</p>
+                <br>
+                <a href="/producer/dashboard"><button class="submit-button">Go to Dashboard</button></a>
+            {% elif session.get('role') == 'guest' %}
+                <p>Shop locally sourced, fairly priced produce directly from farmers in your area.</p>
+            {% else %}
+                <p>Shop locally sourced, fairly priced produce directly from farmers in your area.</p>
+                <br>
+                <p>
+                    Already a user? &nbsp;<a href="/sign-in"><button class="submit-button">Sign In</button></a>
+                </p>
+                <p style="margin-top:8px;">
+                    Are you a producer? &nbsp;<a href="/producer/sign-in"><button class="submit-button">Producer Login</button></a>
+                </p>
+            {% endif %}
+
+
+        </div>
+        <div class="hero-right">
+            <p><strong>Supporting local farmers</strong> and providing transparent, fair pricing to our community.</p>
+            <br>
+            <a href="/about"><button class="submit-button">Find out more</button></a>
+        </div>
+    </div>
+
+
+    <!-- members discount banner -->
+    <div class="promo-banner">
+        <span>&#11088; <strong>Member discount available!</strong> Sign in to get 10% off all products.</span>
+        <a href="/alerts"><button class="submit-button">View Promotions</button></a>
+    </div>
+
+
+    <!-- producers preview section: 3 cards + view all button -->
+    <div class="home-section">
+        <h2>Here are some of our producers:</h2>
+        <div class="producers-grid">
+            {% for producer in producers %}
+            <div class="producer-card">
+                <div class="producer-card-image">{% if producer.image %}<img src="/static/images/{{ producer.image }}" alt="{{ producer.name }}">{% else %}[IMAGE]{% endif %}</div>
+                <h3>{{ producer.name }}</h3>
+                <p>{{ producer.description }}</p>
+                <a href="/producers"><button class="submit-button">Find out more</button></a>
+            </div>
+            {% else %}
+            <p>No producers listed yet.</p>
+            {% endfor %}
+        </div>
+        <div style="margin-top:14px;">
+            <a href="/producers"><button class="submit-button">View All Producers</button></a>
+        </div>
+    </div>
+
+
+    <!-- featured products section: 3 cards + view more button -->
+    <div class="home-section" style="padding-bottom:40px;">
+        <h2>Here are some products:</h2>
+        <div class="products-grid">
+            {% for product in featured_products %}
+            <div class="product-card">
+                <div class="product-card-image">{% if product.image %}<img src="/static/images/{{ product.image }}" alt="{{ product.name }}">{% else %}[IMAGE]{% endif %}</div>
+                <h3>{{ product.name }}</h3>
+                <p class="desc">{{ product.transparency_details[:70] }}{% if product.transparency_details | length > 70 %}...{% endif %}</p>
+                <p class="price-stock">
+                    £{{ "%.2f" | format(product.price_cents / 100) }}<br>
+                    Stock: {{ product.stock }}
+                </p>
+                <div class="product-card-buttons">
+                    <a href="/product/{{ product.productID }}"><button class="submit-button">View Item</button></a>
+                    {% if session.get('role') == 'customer' %}
+                        <form action="/basket/add" method="post" style="display:inline;">
+                            <input type="hidden" name="product_id" value="{{ product.productID }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button class="submit-button" type="submit">&#128722;</button>
+                        </form>
+                    {% else %}
+                        <a href="/sign-in"><button class="submit-button">&#128722;</button></a>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <p>No products listed yet.</p>
+            {% endfor %}
+        </div>
+        <div style="margin-top:14px;">
+            <a href="/products"><button class="submit-button">View More Products</button></a>
+        </div>
+    </div>
+
+
+    <div class="site-footer">
+        <p>Greenfield Local Hub &mdash; Supporting local farmers.
+        &nbsp;|&nbsp; <a href="/about">About</a>
+        &nbsp;|&nbsp; <a href="/alerts">Promotions</a>
+        &nbsp;|&nbsp; <a href="/producers">Our Producers</a>
+        {% if not session.get('role') %}
+            &nbsp;|&nbsp; <a href="/producer/sign-in">Producer Login</a>
+        {% endif %}
+        </p>
+    </div>
+
+
+</body>
+</html>

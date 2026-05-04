@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Greenfield Local Hub</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        {% if session.get('role') == 'customer' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about" class="active">About</a>
+            <a href="/alerts">Promotions</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/account" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'producer' %}
+            <a href="/producer/dashboard">Dashboard</a>
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about" class="active">About</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/producer/profile" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'guest' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/about" class="active">About</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up">Sign Up</a>
+        {% else %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/sign-up">Sign Up</a>
+            <a href="/sign-in">Log In</a>
+            <a href="/about" class="active">About</a>
+        {% endif %}
+    </div>
+
+    <div class="about-body">
+        <div class="about-section">
+            <h2>About Greenfield Local Hub</h2>
+            <p>Greenfield Local Hub connects local farmers and producers directly with customers in their community.</p>
+            <p>We believe in transparent pricing. Every product shows you exactly why it costs what it costs, from fair wages to seasonal supply chains</p>
+        </div>
+
+        <div class="about-section">
+            <h2>Why shop with GLH?</h2>
+            <ul>
+                <li>Support local farmers and reduce food miles</li>
+                <li>Fully transparent pricing on all products</li>
+                <li>Fresh, seasonal produce delivered to your door</li>
+                <li>Traceable products. You get to know where your food comes from, always!</li>
+            </ul>
+        </div>
+
+        <div class="about-section">
+            <h2>Member promotions</h2>
+            <p>Sign in to unlock a 10% off discount on all products. We also run regular seasonal promotions open to everyone</p>
+            <br>
+            <a href="/alerts"><button class="submit-button">View our current promotions</button></a>
+        </div>
+
+        <div class="about-section">
+            <h2>Our producers</h2>
+            <p>We work with a growing network of trusted local producers committed to quality and product transparency</p>
+            <br>
+            <a href="/producers"><button class="submit-button">Meet our producers</button></a>
+            <a href="/products"><button class="submit-button">Browse products</button></a>
+        </div>
+    
+    </div>
+
+</body>
+</html>

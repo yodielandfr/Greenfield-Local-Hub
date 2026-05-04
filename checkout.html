@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Greenfield Local Hub</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        {% if session.get('role') == 'customer' %}
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/alerts">Promotions</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/account" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'producer' %}
+            <a href="/producer/dashboard">Dashboard</a>
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/producer/profile" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'guest' %}
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up">Sign Up</a>
+        {% else %}
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/sign-up">Sign Up</a>
+            <a href="/sign-in">Log In</a>
+            <a href="/about">About</a>
+        {% endif %}
+    </div>
+
+    <h2 class="basket-heading">Checkout:</h2>
+
+    {% if items %}
+        {% for item in items %}
+        <div class="basket-item">
+            <div class="basket-item-image">{% if item.image %}<img src="/static/images/{{ item.image }}" alt{{ item.name }}">{% else %}&#127825;{% endif %}</div>
+            <div class="basket-item-info">
+                <h3>{{ item.name }}</h3>
+                <p style="font-size: 0.80rem; color: #1a5c38; margin-bottom: 3px;">By {{ item.producer_name }}</p>
+                <p class="desc-bar">{{ item.transparency_details }}</p>
+            </div>
+
+            <div class="basket-item-right">
+                {% if session.get("role") == 'customer' %}
+                    <p class="price-main">£{{ "%.2f" | format(item.price_cents * 0.9 / 100) }} <span style="color: #1a5c38; font-size: 0.8rem;">(10% Off)</span></p>
+                    <p class="price-detail" style="text-decoration: line-through; color: #888;">Was £{{ "%.2f" | format(item.price_cents / 100) }}</p>
+                {% else %}
+                    <p class="price-main">£{{ "%.2f" | format(item.price_cents / 100) }}</p>
+                {% endif %}
+                <p class="price-detail">Stock: {{ item.stock }} Qty: {{ item.quantity }}</p>
+                <form action="/basket/remove/{{ item.productID }}" method="post">
+                    <button class="submit-button" type="submit">[Remove]</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="basket-totals">
+            <p><strong>Amount of items: {{ item_count }}</strong></p>
+            {% if session.get("role") == 'customer' %}
+                <p style="text-decoration: line-through; color: #888;">Was: £{{ "%.2f" | format(total_cents / 100) }}</p>
+                <p><strong>Order Total: £{{ "%.2f" | format(total_cents * 0.9 / 100) }}</strong><span style="color: #1a5c38;">(10% Members Discount)</span></p>
+            {% else %}
+                <p><strong>Order Total: £{{ "%.2f" | format(total_cents / 100) }}</strong></p>
+            {% endif %}
+        </div>
+
+
+        <form action="/checkout/confirm" method="post" class="checkout-address">
+            <!-- select either delivery or collection -->
+            <select name="delivery_option" id="delivery_option" onchange="toggleFields()" style="display: block; padding: 9px; width: 320px; margin-bottom: 12px; border: 1px solid #ccc; font-size: 0.95rem; font-family: inherit;">
+                <option value="delivery">Delivery</option>
+                <option value="collection">Collection (Pick up in store)</option>
+            </select>
+
+            <!-- delivery fields -->
+             <div id="delivery-fields">
+                {% if is_guest %}
+                <input type="email" id="email-delivery" name="guest_email" placeholder="Your email address" autocomplete="off">
+                {% endif %}
+                <input type="text" name="delivery_address" value="{{ address }}" placeholder="Address" autocomplete="off">
+                <div class="postcode-row">
+                    <input type="text" name="delivery_postcode" value="{{ postcode }}" placeholder="postcode" autocomplete="off">
+                    <button class="submit-button" type="submit">Checkout</button>
+                </div>
+             </div>
+
+             <!-- collection store picker -->
+             <div id="collection-fields" style="display: none;">
+                {% if is_guest %}
+                <input type="email" id="email-collection" name="guest_email" placeholder="Your email" autocomplete="off">
+                {% endif %}
+                <p style="margin-bottom: 8px; font-size: 0.9rem;">Select a GLH pick-up location</p>
+                <select name="collection_store" style="display:block; padding:9px; width:320px; margin-bottom:12px; border:1px solid #ccc; font-size:0.95rem; font-family:inherit;">
+                    <option value="GLH North Hub - Manchester (M1 1AA)">GLH North Hub - Manchester (M1 1AA)</option>
+                    <option value="GLH South Hub - Bristol (BS1 1AA)">GLH South Hub - Bristol (BS1 1AA)</option>
+                    <option value="GLH East Hub - Norwich (NR1 1AA)">GLH East Hub - Norwich (NR1 1AA)</option>
+                    <option value="GLH West Hub - Cardiff (CF1 1AA)">GLH West Hub - Cardiff (CF1 1AA)</option>
+                    <option value="GLH Central Hub - Birmingham (B1 1AA)">GLH Central Hub - Birmingham (B1 1AA)</option>
+                </select>
+                <button class="submit-button" type="submit">Checkout</button>
+             </div>
+        </form>
+    {% else %}
+        <div class="empty-state">
+            <p>Your basket is empty</p>
+            <a href="/products"><button class="submit-button">Browse Products</button></a>
+        </div>
+    {% endif %}
+
+    <script>
+        function toggleFields() {
+            var option = document.getElementById('delivery_option').value;
+            var deliveryFields = document.getElementById('delivery-fields');
+            var collectionFields = document.getElementById('collection-fields');
+
+            if (option === 'collection') {
+                deliveryFields.style.display = 'none';
+                collectionFields.style.display = 'block';
+            } else {
+                deliveryFields.style.display = 'block';
+                collectionFields.style.display = 'none'
+            }
+        }
+
+    </script>
+
+</body>
+</html>

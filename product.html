@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - Greenfield Local Hub</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        {% if session.get('role') == 'customer' %}
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/alerts">Promotions</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/account" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'producer' %}
+            <a href="/producer/dashboard">Dashboard</a>
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/producer/profile" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'guest' %}
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up">Sign Up</a>
+        {% else %}
+            <a href="/products" class="active">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/sign-up">Sign Up</a>
+            <a href="/sign-in">Log In</a>
+            <a href="/about">About</a>
+        {% endif %}
+    </div>
+
+    <div class="product-detail-layout">
+        <div class="product-detail-image">
+            {% if product.image %}
+                <img src="/static/images/{{ product.image }}" 
+                alt="{{ product.name }}" 
+                style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                product image
+            {% endif %}
+        </div>
+
+        <div class="product-detail-info">
+            <h2>{{ product.name }}</h2>
+            <div class="desc-lines">
+                <p>{{ product.transparency_details }}</p>
+            </div>
+
+            <p class="stock-line">Stock: {{ product.stock }}</p>
+            <p style="font-size: 0.85rem; color: #1a5c38; margin-bottom: 10px;">By {{ product.producer_name }}</p>
+
+            <!-- pricing details-->
+            {% if member_price %}
+                <div class="member-price-box">
+                    <p class="standard-price">Full price: £{{ "%.2f" | format(product.price_cents / 100) }}</p>
+                    <p class="member-price">&#11088; Your price: £{{ "%.2f" | format(member_price / 100) }} (10% Off)</p>
+                </div>
+            {% else %}
+                <p style="font-weight: bold; margin-bottom: 10px;">Price: £{{ "%.2f" | format(product.price_cents / 100) }}</p>
+                
+                {% if session.get("role") not in ('customer', 'producer', 'guest') %}
+                <p class="member-promo-note">&#11088; Create an account or Sign in to unlock 10% off all products.</p>
+                {% endif %}
+            {% endif %}
+            
+            <!-- add items to basket button and functionality-->
+            {% if session.get('role') == 'producer' %}
+                <p style="color: #555;">Producers cannot add items to the basket</p>
+            {% else %}
+                {% if session.get('role') not in ('customer', 'guest') %}
+                <p style="margin: bottom 10px; font-size: 0.9rem;"><a href="/sign-in">Sign in</a> or <a href="/sign-up">create an account</a> for 10% off.</p>
+                {% endif %}
+                
+                <form action="/basket/add" method="post" class="add-basket-row">
+                    <input type="hidden" name="product_id" value="{{ product.productID }}">
+
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit">Add To Basket</button>
+                </form>
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</body>
+</html>

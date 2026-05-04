@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - </title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+
+    <style>
+        .bar-col { position: relative; }
+        .bar-fill { cursor: pointer; transition: opacity 0.15s; }
+        .bar-fill:hover { opacity: 0.75; }
+        .bar-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 3px 7px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .bar-col:hover .bar-tooltip { display: block; }
+    </style>
+
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        </a>
+        <a href="/producer/dashboard" class="active">Dashboard</a>
+        <a href="/products">Products</a>
+        <a href="/producers">Producers</a>
+        <a href="/about">About</a>
+        <a href="/sign-out">Sign Out</a>
+        <a href="/producer/profile" class="account-icon">&#128100;</a>
+    </div>
+
+    
+    <h2 class="dashboard-heading">Welcome back, {{ session.get('producer_name') }}</h2>
+
+    <div class="dashboard-top">
+
+        <div class="dash-panel">
+            <h3>Todays Sales (Units)</h3>
+            <div class="bar-chart-wrap" id="bar-chart">
+                <div class="bar-col">
+                    <span class="bar-tooltip" id="tip0"></span>
+                    <div class="bar-fill" id="bar0"></div>
+                    <small>00:00</small>
+                </div>
+                
+                <div class="bar-col">
+                    <span class="bar-tooltip" id="tip1"></span>
+                    <div class="bar-fill" id="bar1"></div>
+                    <small>06:00</small>
+                </div>
+
+                <div class="bar-col">
+                    <span class="bar-tooltip" id="tip2"></span>
+                    <div class="bar-fill" id="bar2"></div>
+                    <small>12:00</small>
+                </div>
+
+                <div class="bar-col">
+                    <span class="bar-tooltip" id="tip3"></span>
+                    <div class="bar-fill" id="bar3"></div>
+                    <small>18:00</small>
+                </div>
+            </div>
+            {% set ns = namespace(total=0) %}
+            {% for product in top_today %}{% set ns.total = ns.total + product.amount_sold %}{% endfor %}
+            <p style="font-size: 0.8rem; margin-top: 6px;">Units sold today: {{ ns.total }}</p>
+        </div>
+
+        <div class="dash-panel">
+            <h3>Total Sales</h3>
+            <div class="total-sales-box">
+                &#163;{{ "%.2f" | format(total_revenue / 100) }}
+            </div>
+        </div>
+
+        <div class="dash-panel">
+            <h3>Items close to restocking</h3>
+            {% for item in low_stock %}
+            <div class="restock-row">
+                <span>{{ item.name }}</span>
+                <span>{{ item.stock }}</span>
+            </div>
+            {% else %}
+            <p style="font-size: 0.8rem; color: #555;">No products yet</p>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <!-- Bottom row of dash -->
+    <div class="dashboard-bottom">
+        <div class="dash-panel">
+            <h3>Top selling products today</h3>
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Amount sold</th>
+                        <th>Amount Left</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in top_today %}
+                    <tr>
+                        <td>
+                            {% if product.image %}
+                                <img src="/static/images/{{ product.image }}" alt="{{ product.name }}" style="width: 40px; height: 40px; object-fit: contain; background: #fff; border-radius: 3px; padding: 2px;">
+                            {% else %}
+                                <div style="width: 32px; height: 32px; background: #b0b0b0; border-radius: 3px;"></div>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ product.name }}</td>
+                        <td>&#163;{{ "%.2f" | format(product.price_cents / 100) }}</td>
+                        <td>{{ product.amount_sold }}</td>
+                        <td>{{ product.stock }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" style="color: #555; padding: 6px;">No sales today</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dash-panel" id="manage-stock">
+            <h3>Inventory</h3>
+            <table class="dash-table">
+                <thead>
+                    <tr><th>Product name</th><th>Stock</th></tr>
+                </thead>
+
+                <tbody>
+                    {% for product in inventory %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.stock }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" style="color: #555; padding: 6px;">No products yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- add new product section -->
+    <div class="manage-section" id="manage-products">
+        <h3>Add a new product</h3>
+        <div class="manage-card">
+            <form action="/producer/product/add" method="post">
+                <table style="border-collapse: collapse; font-size: 0.9rem;">
+                    <tr>
+                        <th style="padding: 4px 8px 4px 0; text-align: left;">Product Name</th>
+                        <th style="padding: 4px 8px 4px 0; text-align: left;">Price</th>
+                        <th style="padding: 4px 8px 4px 0; text-align: left;">Stock</th>
+                        <th style="padding: 4px 8px 4px 0; text-align: left;">Pricing details</th>
+                        <th></th>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 8px 0 0;"><input type="text" name="name" placeholder="eg: Fair trade Bannanas" autocomplete="off"></td>
+                        <td style="padding: 0 8px 0 0;"><input type="number" name="price_cents" placeholder="eg: 199" autocomplete="off" min="0"></td>
+                        <td style="padding: 0 8px 0 0;"><input type="number" name="stock" placeholder="eg: 50" autocomplete="off" min="0"></td>
+                        <td style="padding: 0 8px 0 0;"><input type="text" name="transparency_details" placeholder="Why it costs this much" autocomplete="off"></td>
+                        <td><button class="submit-button" type="submit">Add</button></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <!-- manage existing products (eg: name, description) -->
+     <div class="manage-section">
+        <h3>Edit/ Delete products</h3>
+        {% if inventory %}
+        <div class="manage-card" style="overflow-x: auto;">
+            <table style="border-collapse: collapse; font-size: 0.85rem; width: 100%;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #aaa;">
+                        <th style="padding: 6px 8px; text-align: left;">Product Name</th>
+                        <th style="padding: 6px 8px; text-align: left;">Price (in pence)</th>
+                        <th style="padding: 6px 8px; text-align: left;">Stock</th>
+                        <th style="padding: 6px 8px; text-align: left;">Pricing Details</th>
+                        <th style="padding: 6px 8px;"></th>
+                        <th style="padding: 6px 8px;"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for product in inventory %}
+                    <tr style="border-bottom: 1px solid #ccc;">
+                        <form action="/producer/product/update/{{ product.productID }}" method="post" style="display: contents;">
+                            <td style="padding: 4px 8px;"><input type="text" name="name" value="{{ product.name }}" autocomplete="off"></td>
+                            <td style="padding: 4px 8px;"><input type="number" name="price_cents" value="{{ product.price_cents }}" autocomplete="off" min="0"></td>
+                            <td style="padding: 4px 8px;"><input type="number" name="stock" value="{{ product.stock }}" autocomplete="off" min="0"></td>
+                            <td style="padding: 4px 8px;"><input type="text" name="transparency_details" value="{{ product.transparency_details }}" autocomplete="off"></td>
+                            <td style="padding: 4px 8px;"><button class="submit-button" type="submit">Save</button></td>
+                        </form>
+
+                        <form action="/producer/product/delete/{{ product.productID }}" method="post" onsubmit="return confirm('Delete {{ product.name }}?');" style="display: contents;">
+                            <td style="padding: 4px 8px;"><button class="submit-button" type="submit">Delete</button></td>
+                        </form>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="padding: 0 20px; color: #555;">No products yet. Add a product above</p>
+        {% endif %}
+     </div>
+
+     <!-- Orders area -->
+      <div class="manage-section">
+        <h3>Orders</h3>
+        {% for card in order_cards %}
+        <div class="manage-card">
+            <h4>Order #{{ card["order"]["orderID"] }} &mdash; {{ card["order"]["orderDate"] }}</h4>
+            <p style="margin: 4px 0;">{{ card["order"]["first_name"] }} {{ card["order"]["last_name"] }}</p>
+            <p style="margin: 4px 0;">
+                {% if card["order"]["delivery_option"] == 'collection' %}
+                    &#128204; Collection: {{ card["order"]["delivery_address"] }}
+                {% else %}
+                    &#128230; Delivery: {{ card["order"]["delivery_address"] }}{% if card["order"]["delivery_postcode"] %}, {{ card["order"]["delivery_postcode"] }}{% endif %}
+                {% endif %}
+            </p>
+
+            <p style="margin: 4px 0;">Status: <strong>{{ card["order"]["status"] }}</strong></p>
+            <ul style="padding-left: 18px; margin: 6px 0;">
+                {% for item in card["items"] %}
+                <li>{{ item.name }} {{ item.quantity }}</li>
+                {% endfor %}
+            </ul>
+
+            <form action="/producer/orders/{{ card['order']['orderID'] }}/status" method="post" style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                <select name="status">
+                    <option {% if card['order']['status'] == 'Processing' %}selected{% endif %}>Processing</option>
+                    <option {% if card['order']['status'] == 'Out for delivery' %}selected{% endif %}>Out for delivery</option>
+                    <option {% if card['order']['status'] == 'Delivered' %}selected{% endif %}>Delivered</option>
+                </select>
+                <button class="submit-button" type="submit">Update Status</button>
+            </form>
+        </div>
+        {% else %}
+        <p style="padding: 0 20px; color: #555;">No orders yet.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Javascript for the bar charts -->
+      <script>
+        var blocks = {{ blocks | tojson }};
+        var labels = ["00:00 - 06:00", "06:00 - 12:00", "12:00 - 18:00", "18:00 - 00:00"]
+
+        // this will take the largest bar and scale the others against it
+        var maxVal = Math.max.apply(null, blocks) || 1;
+        var chartHeight = 80;
+
+        for (var i = 0; i < 4; i++) {
+            var bar = document.getElementById('bar' + i);
+            var tip = document.getElementById('tip' + i);
+            var h = Math.max(4, Math.round((blocks[i] / maxVal) * chartHeight)); //calculating the height
+
+            bar.style.height = h + 'px'; //takes the height and adds a 'px' to make it a size value
+            tip.textContent = labels[i] + ': ' + blocks[i] + ' units';
+        }
+
+      </script>
+
+</body>
+</html>

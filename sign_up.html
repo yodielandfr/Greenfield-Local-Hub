@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Greenfield</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        {% if session.get('role') == 'customer' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/alerts">Promotions</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/account" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'producer' %}
+            
+            <a href="/producer/dashboard">Dashboard</a>
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/about">About</a>
+            <a href="/sign-out">Sign Out</a>
+            <a href="/producer/profile" class="account-icon">&#128100;</a>
+        {% elif session.get('role') == 'guest' %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/basket">Basket</a>
+            <a href="/checkout">Checkout</a>
+            <a href="/sign-in">Sign In</a>
+            <a href="/sign-up" class="active">Sign Up</a>
+        {% else %}
+            <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+            <a href="/sign-up" class="active">Sign Up</a>
+            <a href="/sign-in">Log In</a>
+            <a href="/about">About</a>
+        {% endif %}
+    </div>
+
+    <div class="auth-wrapper">
+        <h2>Register an account with GLH now</h2>
+        <p class="subtitle">Members recieve promotional offers and a 10% discount on all products</p>
+        
+        <form action="/sign-up" method="post">
+            <div class="name-row">
+                <input type="text" name="first_name" placeholder="First Name" autocomplete="off">
+                <input type="text" name="last_name" placeholder="Last Name" autocomplete="off">
+            </div>
+            <input type="text" name="email" placeholder="Email Address: eg- something@mailtype.com" autocomplete="off">
+            <input type="password" name="password" placeholder="Password" autocomplete="off">
+            <p class="pw-hints">
+                Password Must contain 8+ characters<br>
+                Password Must contain a number<br>
+                Password Must contain a special character
+            </p>
+            <button class="submit-button" type="submit">Submit</button>
+        </form>
+
+        {% if message %}
+            <p class="error-text">{{ message }}</p>
+        {% endif %}
+    </div>
+
+
+</body>
+</html>

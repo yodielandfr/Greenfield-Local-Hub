@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My account - Greenfield Local Hub</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+        <a href="/about">About</a>
+        <a href="/alerts">Promotions</a>
+        <a href="/basket">Basket</a>
+        <a href="/checkout">Checkout</a>
+        <a href="/sign-out">Sign Out</a>
+        <a href="/account" class="account-icon active">&#128100;</a>
+    </div>
+
+    <div class="form-wrapper" style="margin: 30px auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h2>Your account details</h2>
+            <a href="/sign-out"><button class="submit-button">Sign out</button></a>
+        </div>
+
+        <form action="/account" method="post">
+            <div class="name-row">
+                <input type="text" name="first_name" value="{{ customer['first_name'] if customer else '' }}" placeholder="First name">
+                <input type="text" name="last_name" value="{{ customer['last_name'] if customer else '' }}" placeholder="Last name">
+            </div>
+            <input type="text" value="{{ customer['email'] if customer else '' }}" placeholder="Email" disabled>
+            <input type="text" name="address" value="{{ customer['address'] or '' if customer else '' }}" placeholder="Address">
+            <input type="text" name="postcode" value="{{ customer['postcode'] if customer else '' }}" placeholder="Postcode">
+            <button class="submit-button" type="submit">Save changes</button>
+        </form>
+
+        <br>
+
+        <a href="/my-orders"><button class="submit-button">View my orders</button></a>
+        <a href="/alerts"><button class="submit-button">View our promotions</button></a>
+
+        <hr style="margin: 20px 0; border: 1px solid #ccc;">
+
+        <form action="/account/delete" method="post" onsubmit="return confirm('Are you sure you want to delete your account?');">
+            <button class="submit-button" type="submit">Delete my account</button>
+        </form>
+
+        <p style="color: #888; font-size: 0.8rem; margin-top: 6px;">Warning: Your account will be deleted. You cannot undo this</p>
+
+    </div>
+
+</body>
+</html>

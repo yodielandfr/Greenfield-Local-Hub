@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your previous orders - GLH</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/settings.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <!-- <a href="/" class="nav-logo"><span class="nav-logo-emoji">&#x1F69C;</span> GLH</a> -->
+        <a href="/"><img src="/static/images/GLH.png" style="width: 50px; height: auto;"></a>
+        <a href="/products">Products</a>
+            <a href="/producers">Producers</a>
+        <a href="/about">About</a>
+        <a href="/alerts">Promotions</a>
+        <a href="/basket">Basket</a>
+        <a href="/checkout">Checkout</a>
+        <a href="/sign-out">Sign Out</a>
+        <a href="/account" class="account-icon">&#128100;</a>
+    </div>
+
+    <h2 class="basket-heading">Your Previous Orders</h2>
+    {% if order_items %}
+        {% for item in order_items %}
+        <div class="order-item">
+            <div class="order-item-image">{% if item.image %}<img src="/static/images/{{ item.image }}" alt="{{ item.name }}">{% else %} [IMAGE] ;{% endif %}</div>
+            <div class="order-item-info">
+                <h3>{{ item.name }}</h3>
+                <p style="font-size:0.82rem; color:#1a5c38; margin-bottom:2px;">By {{ item.producer_name }}</p>
+                <p class="desc-bar">{{ item.transparency_details }}</p>
+                <p style="font-size: 0.8rem; color: #555; margin-top: 4px;">
+                    {% if item.delivery_option == "collection" %}
+                        &#128204; Collection: {{ item.delivery_address }}
+                    {% else %}
+                        &#128230; Delivering to: {{ item.delivery_address }} {% if item.delivery_postcode %}, {{ item.delivery_postcode }}{% endif %}
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="order-item-right">
+                <p class="order-date">{{ item.order_date_part }}</p>
+                {% if item.order_time_part %}
+                <p style="font-size: 0.8rem; color:#555;">at {{ item.order_time_part }}</p>
+                {% endif %}
+                <p class="amount-paid">£{{ "%.2f" | format(item.amount_paid / 100) }}</p>
+                <p style="font-size: 0.8rem; text-decoration: line-through; color: #aaa;">
+                    was £{{ "%.2f" | format(item.full_price_paid / 100) }}
+                </p>
+                <p class="qty">Quantity: {{ item.quantity }}</p>
+                <p style="font-size: 0.8rem; color: #555;">{{ item.status }}</p>
+            </div>
+        </div>
+        <hr class="order-divider">
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p>You have no previous orders</p>
+            <a href="/products"><button class="submit-button">Start Shopping</button></a>
+        </div>
+    {% endif %}
+
+</body>
+</html>
